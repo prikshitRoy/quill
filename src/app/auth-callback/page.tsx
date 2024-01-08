@@ -23,8 +23,8 @@ const page = () => {
         router.push("/sign-in");
       }
     },
-    retry: true,
-    retryDelay: 500,
+    retry: true, //!  This means that if the API call fails, it will automatically be retried
+    retryDelay: 500, //! In this case, if the API call fails, it will wait for 500 milliseconds
   });
   return (
     <div className="w-full mt-24 flex justify-center">

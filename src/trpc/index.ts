@@ -26,7 +26,7 @@ export const appRouter = router({
       });
     }
 
-    return { success: true }; //! 02:22:00
+    return { success: true };
   }),
 });
 export type AppRouter = typeof appRouter;
