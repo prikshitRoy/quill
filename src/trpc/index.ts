@@ -1,5 +1,5 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { publicProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 
@@ -10,14 +10,14 @@ export const appRouter = router({
 
     if (!user?.id || !user.email) throw new TRPCError({ code: "UNAUTHORIZED" });
 
-    // check if the User in the database
+    //! check if the User in the database
     const dbUser = await db.user.findFirst({
       where: {
         id: user.id,
       },
     });
     if (!dbUser) {
-      // create user in db
+      //! create user in db
       await db.user.create({
         data: {
           id: user.id,
@@ -27,6 +27,17 @@ export const appRouter = router({
     }
 
     return { success: true };
+  }),
+
+  //! API-End point to get User PDF files
+  getUserFiles: privateProcedure.query(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    return await db.file.findMany({
+      where: {
+        userId,
+      },
+    });
   }),
 });
 export type AppRouter = typeof appRouter;
