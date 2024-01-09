@@ -11,11 +11,38 @@ import { Progress } from "./ui/progress";
 const UploadDropzone = () => {
   const [isUploading, setIsUploading] = useState<boolean>(true);
 
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  //! Determinate Progress bar
+  const startSimulatedProgress = () => {
+    setUploadProgress(0);
+
+    const interval = setInterval(() => {
+      setUploadProgress((prevProgress) => {
+        if (prevProgress >= 95) {
+          clearInterval(interval);
+          return prevProgress;
+        }
+        return prevProgress + 5;
+      });
+    }, 500);
+
+    return interval;
+  };
+
   return (
     <Dropzone
       multiple={false}
-      onDrop={(acceptedFiles) => {
-        console.log(acceptedFiles);
+      onDrop={async (acceptedFiles) => {
+        setIsUploading(true);
+
+        const progressInterval = startSimulatedProgress();
+
+        // handle file uploading
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -52,7 +79,10 @@ const UploadDropzone = () => {
               {/* Loading State */}
               {isUploading ? (
                 <div className="w-full mt-4 max-w-xs mx-auto">
-                  <Progress value={50} className="h-1 w-full bg-zinc-200" />
+                  <Progress
+                    value={uploadProgress}
+                    className="h-1 w-full bg-zinc-200"
+                  />
                 </div>
               ) : null}
             </label>
