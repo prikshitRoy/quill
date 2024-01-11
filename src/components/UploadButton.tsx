@@ -7,11 +7,27 @@ import { Button } from "./ui/button";
 import Dropzone from "react-dropzone";
 import { Cloud, File } from "lucide-react";
 import { Progress } from "./ui/progress";
+import { useUploadThing } from "@/lib/uploadthing";
+import { useToast } from "./ui/use-toast";
+import { trpc } from "@/app/_trpc/client";
+import { useRouter } from "next/navigation";
 
 const UploadDropzone = () => {
+  const router = useRouter();
   const [isUploading, setIsUploading] = useState<boolean>(true);
-
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const { toast } = useToast();
+
+  const { startUpload } = useUploadThing("pdfUploader");
+
+  //! Polling
+  const { mutate: startPolling } = trpc.getFile.useMutation({
+    onSuccess: (file) => {
+      router.push(`/dashboard/${file.id}`);
+    },
+    retry: true,
+    retryDelay: 500,
+  });
 
   //! Determinate Progress bar
   const startSimulatedProgress = () => {
@@ -38,11 +54,32 @@ const UploadDropzone = () => {
 
         const progressInterval = startSimulatedProgress();
 
-        // handle file uploading
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        //! handle file uploading
+        const res = await startUpload(acceptedFiles);
+
+        if (!res) {
+          return toast({
+            title: "Something went wrong",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
+
+        const [fileResponse] = res;
+        const key = fileResponse?.key;
+
+        if (!key) {
+          return toast({
+            title: "Something went wrong",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        }
 
         clearInterval(progressInterval);
         setUploadProgress(100);
+
+        startPolling({ key });
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -63,7 +100,6 @@ const UploadDropzone = () => {
                 </p>
                 <p className="text-xs text-zinc-500">PDF (up to 4MB)</p>
               </div>
-
               {/* file preview */}
               {acceptedFiles && acceptedFiles[0] ? (
                 <div className="max-w-xs bg-white flex items-center rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200">
@@ -75,7 +111,6 @@ const UploadDropzone = () => {
                   </div>
                 </div>
               ) : null}
-
               {/* Loading State */}
               {isUploading ? (
                 <div className="w-full mt-4 max-w-xs mx-auto">
@@ -85,6 +120,13 @@ const UploadDropzone = () => {
                   />
                 </div>
               ) : null}
+              ,
+              <input
+                {...getInputProps()}
+                type="file"
+                id="dropzone-file"
+                className="hidden"
+              />
             </label>
           </div>
         </div>

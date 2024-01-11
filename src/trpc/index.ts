@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { z } from "zod";
 
 export const appRouter = router({
+  //! checking if user in Authenticated
   authCallBack: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
     const user = await getUser();
@@ -40,6 +41,24 @@ export const appRouter = router({
       },
     });
   }),
+
+  //! Reaciving pdf file from user
+  getFile: privateProcedure
+    .input(z.object({ key: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+
+      const file = await db.file.findFirst({
+        where: {
+          key: input.key,
+          userId,
+        },
+      });
+
+      if (!file) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return file;
+    }),
 
   //! API-End point to delete User file
   deleteFile: privateProcedure
