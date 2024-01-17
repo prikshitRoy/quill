@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import SimpleBar from "simplebar-react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 interface PdfRendererProps {
@@ -138,29 +139,35 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
       </div>
 
       <div className="flex-1 w-full max-h-full">
-        <div ref={ref}>
-          <Document
-            loading={
-              <div className="flex justify-center">
-                <Loader2 className="my-24 h-6 w-6 animate-spin" />
-              </div>
-            }
-            onLoadError={() => {
-              toast({
-                title: "Error loading PDF",
-                description: "Please try again later",
-                variant: "destructive",
-              });
-            }}
-            /* When the PDF document is successfully loaded (onLoadSuccess), setNumPages is called with the total number of pages in the document, updating the state.  */
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            file={url}
-            className="max-h-full"
-          >
-            {/* pageNumber={currPage}: This specifies the page number to display. currPage is a state variable that keeps track of the current page number. It’s updated when the user navigates between pages. */}
-            <Page width={width ? width : 1} pageNumber={currPage} />
-          </Document>
-        </div>
+        <SimpleBar autoHide={false} className="max-h-[calc(100vh-10rem)]">
+          <div ref={ref}>
+            <Document
+              loading={
+                <div className="flex justify-center">
+                  <Loader2 className="my-24 h-6 w-6 animate-spin" />
+                </div>
+              }
+              onLoadError={() => {
+                toast({
+                  title: "Error loading PDF",
+                  description: "Please try again later",
+                  variant: "destructive",
+                });
+              }}
+              /* When the PDF document is successfully loaded (onLoadSuccess), setNumPages is called with the total number of pages in the document, updating the state.  */
+              onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+              file={url}
+              className="max-h-full"
+            >
+              {/* pageNumber={currPage}: This specifies the page number to display. currPage is a state variable that keeps track of the current page number. It’s updated when the user navigates between pages. */}
+              <Page
+                width={width ? width : 1}
+                pageNumber={currPage}
+                scale={scale}
+              />
+            </Document>
+          </div>
+        </SimpleBar>
       </div>
     </div>
   );
