@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Search } from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -13,6 +13,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 interface PdfRendererProps {
@@ -28,6 +34,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
   //! numPages = Total number of Pages, currPage = The current page that is being displayed
   const [numPages, setNumPages] = useState<number>();
   const [currPage, setCurrPage] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1);
 
   //! Validating User input
   const CustomPageValidator = z.object({
@@ -101,6 +108,32 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
           >
             <ChevronUp className="h-4 w-4" />
           </Button>
+        </div>
+
+        {/* Zoom */}
+        <div className="space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-label="zoom" variant="ghost" className="gap-1.5">
+                <Search className="h-4 w-4" />
+                {scale * 100}%<ChevronDown className="h-3 w-3 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setScale(1)}>
+                100%
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setScale(1.5)}>
+                150%
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setScale(2)}>
+                200%
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setScale(2.5)}>
+                250%
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
