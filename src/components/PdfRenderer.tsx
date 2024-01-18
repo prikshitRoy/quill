@@ -46,6 +46,9 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
   const [scale, setScale] = useState<number>(1);
   //! Rotation State
   const [rotation, setRotation] = useState<number>(0);
+  //!  Managing Zoom lag for slower CPU
+  const [renderedScale, setRenderedScale] = useState<number | null>(null);
+  const isLoading = renderedScale !== scale;
 
   //! Validating User input
   const CustomPageValidator = z.object({
@@ -182,11 +185,29 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
               className="max-h-full"
             >
               {/* pageNumber={currPage}: This specifies the page number to display. currPage is a state variable that keeps track of the current page number. It’s updated when the user navigates between pages. */}
+              {isLoading && renderedScale ? (
+                <Page
+                  width={width ? width : 1}
+                  pageNumber={currPage}
+                  scale={scale}
+                  rotate={rotation}
+                  key={"@" + renderedScale}
+                />
+              ) : null}
+
               <Page
+                className={cn(isLoading ? "hidden" : "")}
                 width={width ? width : 1}
                 pageNumber={currPage}
                 scale={scale}
                 rotate={rotation}
+                key={"@" + scale}
+                loading={
+                  <div className="flex justify-center">
+                    <Loader2 className="my-24 h-6 w-6 animate-spin" />
+                  </div>
+                }
+                onRenderSuccess={() => setRenderedScale(scale)}
               />
             </Document>
           </div>
