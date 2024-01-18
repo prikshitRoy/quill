@@ -84,5 +84,23 @@ export const appRouter = router({
 
       return file;
     }),
+
+  //! Find a file & check the UploadStatus status of the file
+  //! Checkout ==> schema.prisma ==> search for  `enum UploadStatus`
+
+  // `getFileUploadStatus`: This is a private procedure that takes an input object with a `fileId` of type string. It queries the database to find the first file that matches the given `fileId` and `userId`. If no file is found, it returns an object with `status` set to “PENDING”. If a file is found, it returns an object with `status` set to the `uploadStatus` of the file.
+  getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
+          id: input.fileId,
+          userId: ctx.userId,
+        },
+      });
+
+      if (!file) return { status: "PENDING" as const };
+      return { status: file.uploadStatus };
+    }),
 });
 export type AppRouter = typeof appRouter;
