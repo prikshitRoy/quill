@@ -79,6 +79,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             disabled={currPage <= 1}
             onClick={() => {
               setCurrPage((prev) => (prev - 1 > 1 ? prev - 1 : 1));
+              setValue("page", String(currPage - 1));
             }}
             variant="ghost"
             aria-label="previous page"
@@ -112,6 +113,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
                 /* The ! after numPages is a TypeScript non-null assertion operator, which is a way to tell the compiler “this will not be null or undefined here”. */
                 prev + 1 > numPages! ? numPages! : prev + 1
               );
+              setValue("page", String(currPage + 1));
             }}
             variant="ghost"
             aria-label="previous page"
@@ -126,7 +128,8 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             <DropdownMenuTrigger asChild>
               <Button aria-label="zoom" variant="ghost" className="gap-1.5">
                 <Search className="h-4 w-4" />
-                {scale * 100}%<ChevronDown className="h-3 w-3 opacity-50" />
+                {scale * 100}%
+                <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -144,10 +147,11 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
           <Button
             onClick={() => setRotation((prev) => prev + 90)}
             variant="ghost"
-            aria-aria-label="rotate 90 degrees"
+            aria-label="rotate 90 degrees"
           >
             <RotateCw className="h-4 w-4" />
           </Button>
