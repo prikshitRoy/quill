@@ -1,10 +1,12 @@
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { PineconeStore } from "@langchain/pinecone";
+import { getPinecone } from "@/lib/pinecone";
 
 const f = createUploadthing();
-
-/* const auth = (req: Request) => ({ id: "fakeId" });  */
 
 export const ourFileRouter = {
   pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
@@ -27,9 +29,49 @@ export const ourFileRouter = {
         },
       });
 
-      //console.log("file url", file.url);
-      console.log("Upload complete for userId:", metadata.userId);
-      //return { uploadedBy: metadata.userId };
+      // try {
+      //   //! Featching PDF from Database
+      //   const response = await fetch(
+      //     `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
+      //   );
+      //   //! To generate some pages We want to index in our Vetor store from them
+      //   //! We need PDF as a blob Object to be able to index it.
+      //   const blob = await response.blob();
+      //   const loader = new PDFLoader(blob);
+
+      //   const pageLevelDocs = await loader.load();
+      //   const pagesAmt = pageLevelDocs.length;
+
+      //   //! vectorize and index entire document
+      //   const pinecone = await getPinecone();
+      //   const pineconeIndex = pinecone.Index("quill");
+
+      //   const embeddings = new OpenAIEmbeddings({
+      //     openAIApiKey: process.env.OPENAI_API_KEY,
+      //   });
+      //   await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+      //     pineconeIndex,
+      //     namespace: createdFile.id,
+      //   });
+
+      //   await db.file.update({
+      //     data: {
+      //       uploadStatus: "SUCCESS",
+      //     },
+      //     where: {
+      //       id: createdFile.id,
+      //     },
+      //   });
+      // } catch (error) {
+      //   await db.file.update({
+      //     data: {
+      //       uploadStatus: "FAILED",
+      //     },
+      //     where: {
+      //       id: createdFile.id,
+      //     },
+      //   });
+      // }
     }),
 } satisfies FileRouter;
 
