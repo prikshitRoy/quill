@@ -29,49 +29,50 @@ export const ourFileRouter = {
         },
       });
 
-      // try {
-      //   //! Featching PDF from Database
-      //   const response = await fetch(
-      //     `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
-      //   );
-      //   //! To generate some pages We want to index in our Vetor store from them
-      //   //! We need PDF as a blob Object to be able to index it.
-      //   const blob = await response.blob();
-      //   const loader = new PDFLoader(blob);
+      try {
+        //! Featching PDF from Upload Database
+        const response = await fetch(
+          `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
+        );
+        //! To generate some pages We want to index in our Vetor store from them
+        //! We need PDF as a blob Object to be able to index it.
+        const blob = await response.blob();
+        const loader = new PDFLoader(blob);
 
-      //   const pageLevelDocs = await loader.load();
-      //   const pagesAmt = pageLevelDocs.length;
+        const pageLevelDocs = await loader.load();
+        const pagesAmt = pageLevelDocs.length;
 
-      //   //! vectorize and index entire document
-      //   const pinecone = await getPinecone();
-      //   const pineconeIndex = pinecone.Index("quill");
+        //! vectorize and index entire document
+        const pinecone = await getPinecone();
+        const pineconeIndex = pinecone.Index("quill");
 
-      //   const embeddings = new OpenAIEmbeddings({
-      //     openAIApiKey: process.env.OPENAI_API_KEY,
-      //   });
-      //   await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-      //     pineconeIndex,
-      //     namespace: createdFile.id,
-      //   });
+        const embeddings = new OpenAIEmbeddings({
+          openAIApiKey: process.env.OPENAI_API_KEY,
+        });
+        await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+          pineconeIndex,
+          namespace: createdFile.id,
+        });
 
-      //   await db.file.update({
-      //     data: {
-      //       uploadStatus: "SUCCESS",
-      //     },
-      //     where: {
-      //       id: createdFile.id,
-      //     },
-      //   });
-      // } catch (error) {
-      //   await db.file.update({
-      //     data: {
-      //       uploadStatus: "FAILED",
-      //     },
-      //     where: {
-      //       id: createdFile.id,
-      //     },
-      //   });
-      // }
+        await db.file.update({
+          data: {
+            uploadStatus: "SUCCESS",
+          },
+          where: {
+            id: createdFile.id,
+          },
+        });
+      } catch (error: any) {
+        console.error(`Error: ${error.message}\nStack Trace: ${error.stack}`);
+        await db.file.update({
+          data: {
+            uploadStatus: "FAILED",
+          },
+          where: {
+            id: createdFile.id,
+          },
+        });
+      }
     }),
 } satisfies FileRouter;
 
